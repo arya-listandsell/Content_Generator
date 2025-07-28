@@ -1,0 +1,4 @@
+Django==5.2.1
+dotenv==0.9.9
+openai==1.82.0
+pandas==2.3.0

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Content Generator</title>
+
+  <!-- jQuery CDN -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 40px;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px;
+      max-width: 900px;
+      margin: auto;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    
+
+    button {
+      margin: 20px auto 0 auto;
+      width: 15%;
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      display: block;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+    input[type="file"]{
+      padding: 10px;
+      width: 97%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+      margin-bottom: 20px;
+        }
+    button {
+      margin-top: 8px;
+    }
+    button:disabled {
+      background-color: #ccc !important;
+      cursor: not-allowed !important;
+      opacity: 0.7;
+    }
+    fieldset {
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 5px;
+    }
+    #selectedPromptPreview {
+      margin-top: 15px;
+      padding: 12px;
+      border: 1px dashed #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+      white-space: pre-wrap;
+      display: none;
+    }
+
+
+    input[type="file"], select {
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-bottom: 20px;
+    }
+
+
+
+
+    .response-box {
+      margin-top: 30px;
+      padding: 15px;
+      background: #e8f5e9;
+      border-left: 5px solid #4CAF50;
+      border-radius: 6px;
+      white-space: pre-wrap;
+    }
+
+    {% comment %} #copybtn{
+      margin: 10px auto 0 auto;
+      width: 8%;
+      background-color: #4CAF50;
+      color: white;
+      padding: 6px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 10px;
+      display: block;
+    } {% endcomment %}
+
+    	#resetBtn{
+        margin: 10px auto 0 auto;
+        width: 8%;
+        background-color: #f44336;
+        color: white;
+        padding: 6px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 10px;
+        display: block;
+      }
+
+
+    /* LOADING OVERLAY */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f4f4f4, #cce0cc);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 6px solid transparent;
+      border-top: 6px solid #4CAF50;
+      border-radius: 50%;
+      animation: spin 1s linear infinite, glow 1.5s ease-in-out infinite;
+      margin-bottom: 30px;
+    }
+
+
+
+  
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 0px #4CAF50; }
+      50% { box-shadow: 0 0 20px #4CAF50; }
+    }
+
+    .loading-wave {
+      font-size: 24px;
+      display: flex;
+      gap: 2px;
+    }
+
+    .loading-wave span {
+      animation: wave 1.4s infinite ease-in-out;
+      display: inline-block;
+      color: #4CAF50;
+    }
+
+    .loading-wave span:nth-child(1) { animation-delay: 0s; }
+    .loading-wave span:nth-child(2) { animation-delay: 0.1s; }
+    .loading-wave span:nth-child(3) { animation-delay: 0.2s; }
+    .loading-wave span:nth-child(4) { animation-delay: 0.3s; }
+    .loading-wave span:nth-child(5) { animation-delay: 0.4s; }
+    .loading-wave span:nth-child(6) { animation-delay: 0.5s; }
+    .loading-wave span:nth-child(7) { animation-delay: 0.6s; }
+    .loading-wave span:nth-child(8) { animation-delay: 0.7s; }
+    .loading-wave span:nth-child(9) { animation-delay: 0.8s; }
+    .loading-wave span:nth-child(10) { animation-delay: 0.9s; }
+
+    @keyframes wave {
+      0%, 100% { transform: translateY(0); opacity: 1; }
+      50% { transform: translateY(-12px); opacity: 0.6; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+      <h1>Content Generator</h1>
+
+
+      <form id="chatForm" enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+
+        <!-- File upload -->
+        <label for="fileInput">Upload File</label>
+        <input type="file" id="fileInput" name="fileInput" accept=".xlsx">
+
+        <label for="language">Language</label>
+        <select name="lanopt" id="language" required>
+            <option value="deutsch">German</option>
+            <option value="englisch">English</option>
+        </select>
+
+
+        <button type="submit" id="submitbtn">Generate</button>
+      </form>
+      <div id="selectedPromptPreview"></div>
+
+
+    <div class="response-box" id="responseBox" style="display:none;">
+      <div id="chatOutput"></div>
+    </div>
+
+
+
+
+  </div>
+  <!-- Loading Overlay -->
+  <div class="overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-wave">
+      <span>L</span><span>o</span><span>a</span><span>d</span><span>i</span><span>n</span><span>g</span><span>.</span><span>.</span><span>.</span>
+    </div>
+  </div>
+
+
+</body>
+<script>
+  
+
+    const previewBox = document.getElementById('selectedPromptPreview');
+
+   
+
+
+
+  $(document).ready(function () {
+    $("#chatForm").on("submit", function (e) {
+      e.preventDefault();
+      let inputsheet = $('#fileInput')[0].files[0];
+      let lanopt = $('#language').val();
+      const formData =new FormData(this);
+      $("#loadingOverlay").css("display", "flex");
+      $.ajax({
+        url: '{% url "generate_response" %}',
+        type: 'POST',
+        data: formData,
+        processData : false,
+        contentType : false,
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        success: function (data) {
+          console.log(data);
+          console.log('Total Tokens: ',data.token_usage.cost)
+          $("#loadingOverlay").hide();
+          $(".response-box").show();
+
+          // Clear old content
+          $("#chatOutput").empty();
+
+          const downloadBox = $("#chatOutput");
+
+          
+          //downloadBox.append(`
+            //</strong>Estimated Cost:</strong> ${data.token_usage.cost.toFixed(4)}</p>
+          //`);
+
+
+
+          // CSV file
+          if (data.csv_base64) {
+            const link = document.createElement("a");
+            link.href = "data:text/csv;base64," + data.csv_base64;
+            link.download = "output.csv";
+            link.innerText = "📥 Download Generated CSV";
+            link.style.display = "block";
+            link.style.marginTop = "10px";
+            downloadBox[0].appendChild(link);   
+          }
+
+
+           //ZIP file (images)
+          //if (data.zip_base64) {
+          //  const zipLink = document.createElement("a");
+          //  zipLink.href = "data:application/zip;base64," + data.zip_base64;
+          //  zipLink.download = "generated_images.zip";
+          //  zipLink.innerText = "🖼️ Download Images ZIP";
+          //  zipLink.style.display = "block";
+          //  zipLink.style.marginTop = "10px";
+          // downloadBox[0].appendChild(zipLink);
+          //}
+
+        },
+        error: function (xhr, status, error) {
+          let message = "Something went wrong.";
+          if (xhr.responseJSON && xhr.responseJSON.response) {
+            message = xhr.responseJSON.response;  
+          }
+          $("#loadingOverlay").hide(); 
+          Swal.fire({icon:'error',text:message,showConfirmButton:false,timer:1000});
+        }
+      });
+    });
+  });
+  </script>
+</html>
