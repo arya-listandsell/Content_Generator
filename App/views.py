@@ -67,48 +67,286 @@ def normalize_slug(name: str) -> str:
     s = re.sub(r"_+", "_", s)
     return s.strip("_")
 
-
+#german
 def build_longform_prompt(page_title: str, keywords: str, sections_rules: List[Tuple[str, int, str]], language: str) -> str:
     section_lines = []
-    for slug, word_count, rule in sections_rules:
-        rule_text = rule if rule else "Keine speziellen Anforderungen"
-        section_lines.append(f"- {slug} ({word_count} Wörter): {rule_text}")
-    prompt = f"""
+    prompt = ""
+    if language == 'deutsch':
+        for slug, word_count, rule in sections_rules:
+            rule_text = rule if rule else "Keine speziellen Anforderungen"
+            section_lines.append(f"- {slug} ({word_count} Wörter): {rule_text}")
+        prompt = f"""
+        
+                # ======================================
+                # 0. VARIABLEN & KAPITELVORGABEN
+                # ======================================
+
+                MAIN_KEYWORD  = {page_title}
+                KEYWORDS      = {keywords}           
+                SECTION_LINES :
+                
+                {section_lines}     
+
+                • Gib für jede SECTION_LINE eine prägnante H2-Überschrift aus – leserorientiert, konkret, mit passenden Keywords.
+                • Keine generischen Titel wie „Kontext“, „Relevanz“, „Ablauf“ oder SEO-Phrasen aus Substantiven.
+                • Die Überschrift soll Interesse wecken, aber nicht den Zweck beschreiben.
+
+                ---
+
+                # ======================================
+                # 1. ZIEL
+                # ======================================
+
+                • Verfasse einen hochwertigen HTML-Servicetext aus Unternehmenssicht zum Thema "{page_title}".
+                • Der Text dient als professionelle, unternehmensnahe Darstellung unserer Dienstleistungen.
+                • Ziel ist es, den konkreten Mehrwert unseres Angebots verständlich, glaubwürdig und kundenorientiert darzustellen – ohne PR-Sprache, aber mit klarer Positionierung.
+                • HTML-Ausgabe gemäß Abschnitt 9.
+
+                ---
+
+                # ======================================
+                # 2. PRIORITÄT (P1–P3)
+                # ======================================
+
+                P1 – HTML-Struktur & Keywordplatzierung  
+                P2 – Logischer Aufbau & Absatzverknüpfung  
+                P3 – Sprachstil & Leserführung  
+
+                ---
+
+                # ======================================
+                # 3. WORKFLOW
+                # ======================================
+
+                PHASE 1 – COMPOSE:  
+                Verwende folgende Platzhalterstruktur:  
+                [H1], [H2], [P], [UL], [LI]  
+
+                PHASE 2 – MARKUP (temp ≤ 0.2):  
+                Ersetze Platzhalter durch finalen HTML-Code. **Nur HTML ausgeben.**
+
+                ---
+
+                # ======================================
+                # 4. CHAIN-OF-THOUGHT (intern)
+                # ======================================
+
+                1) Themenverständnis  
+                2) Strukturierung der Abschnitte  
+                3) Textproduktion (compose)  
+                4) Qualitätsscan  
+                5) HTML-Umsetzung (markup)
+                
+                ---
+
+                # ======================================
+                # 5. KEYWORD-REGELN (P1)
+                # ======================================
+
+                • {page_title}: in <h1>, ≥ 3× im Text (≤100 Wörter Abstand)  
+                • KEYWORDS: mind. 1× pro Abschnitt (in <h2> oder <h3>), organisch eingebaut  
+                • Keine Abwandlungen: exakt, orthografisch korrekt, natürlich integriert  
+
+                ---
+
+                # ======================================
+                # 6. STIL-REGELN (P2)
+                # ======================================
+
+                ## A. Haltung & Ton
+
+                - Sie-Form – ruhig, professionell, sachlich-empathisch
+                - Keine künstliche Lockerheit
+                - Leseransprache auf Augenhöhe
+                - – Ziel: Orientierung durch nachvollziehbaren, glaubwürdigen Mehrwert – ohne Übertreibung
+                - Kurze, realistische, allgemein erkennbare Alltagsszenen erlaubt  
+                → Keine Einzelfälle, aber illustrative Mini-Situationen zur Verdeutlichung  
+                → Ergänze nachvollziehbares Insiderwissen
+                - Verwenden Sie lebensnahe, bildhafte, aber sachlich bleibende Formulierungen – mit feiner Emotionalität, ohne Übertreibung oder anbiedernden Ton.
+
+
+                ## B. Positionierung 
+                • Der Text soll nicht nur informieren, sondern die Leistungen und Stärken des Unternehmens klar erkennbar machen.
+                • Positionieren Sie das Unternehmen als kompetenten, verlässlichen Anbieter – faktenbasiert, glaubwürdig und kundennah.
+                • Vermeiden Sie übermäßige Selbstbezüge wie „unser Team“, „unsere Erfahrung“, „unsere Kund:innen“ – verwenden Sie neutrale Formulierungen oder bauen Sie die Leistung in den Lösungskontext ein (z.B. „Der gesamte Ablauf wird koordiniert“ statt „Unser Team koordiniert …“).
+                    - Maximal 1× „unser/unserer“ pro Absatz.
+                • Zeigen Sie konkret, **welche Probleme gelöst werden**, **wie der Service funktioniert** und **welchen Nutzen Kund:innen daraus ziehen**.
+                • Verwenden Sie sachlich überzeugende Formulierungen
+                • Bleiben Sie dabei präzise und zurückhaltend – keine PR-Sprache, keine Superlative, keine Heilsversprechen.
+
+                ## C. Ausdruck
+
+                - Klar, strukturiert, präzise – ohne Schnörkel
+                - Keine Floskeln, Buzzwords, Superlative oder PR-Sprache
+                - Keine Phrasen wie „Keine Sorge“, „Hand aufs Herz“
+                - Keine Wortspiele oder Metaphern
+                - Nutzen konkret benennen – keine Konjunktive
+                - Vermeiden Sie ausgeleierte Werbeformulierungen wie „Erleben Sie“, „Vertrauen Sie“, „Mit uns wird ...“, „steht Ihnen mit Rat und Tat zur Seite“.
+                - Wenig bis keine Dopplungen in Formulierungen wie „stressfrei und sorgenfrei“, „schnell und unkompliziert“.
+                - Bevorzugen Sie klare, belegbare Aussagen statt Versprechens-Rhetorik.
+
+
+                ## D. Satzbau & Rhythmus
+
+                - Ø-Satzlänge 12–25 Wörter (StdAbw ≥ 6 W.)
+                - 40 % kurz (≤12 W.), 40 % mittel (13–20 W.), 20 % lang (>20 W.)
+                - Max. 1 Hauptsatz + 1 Nebensatz pro Satz
+                - Nach zwei langen Sätzen: 1 kurzer Satz (<10 W.)
+                - Satzanfänge variieren, kein gleichförmiger Rhythmus
+                - Erlaubt sind gelegentliche stilistische Abweichungen wie Inversionen, Parenthesen oder Ein-Wort-Sätze, um einen lebendigeren Sprachfluss zu erzeugen.
+                - Erzielen Sie einen lebendigen Rhythmus durch den Wechsel von kurzen Statements und längeren Gedankenbögen („Burstiness“).
+
+
+
+                ## E. Struktur
+
+                - Logisch aufeinander aufbauende Kapitel
+                - Keine separaten Einleitungen je Abschnitt
+                - Rhetorische Fragen: max. 2–3 pro Text, gezielt platziert, um Denkimpulse oder sanfte Übergänge zu schaffen – nicht zur Dramatisierung.
+                - Kein Pathos, kein Storytelling um des Effekts willen
+                - Der erste Satz jedes Abschnitts muss sich sprachlich klar vom vorherigen unterscheiden.
+                - Vermeiden Sie gleichförmige Satzanfänge wie „Ein …“, „Der …“, „Ein weiterer …“, „Dabei …“ etc.
+                    • Erlaubt sind z.B.:
+                    – Beobachtungen
+                    – logische Übergänge 
+                    – kurze Feststellungen 
+                    – situative Sätze 
+                    • Verwenden Sie unterschiedliche Einstiegstypen:
+                    - sachliche Feststellungen  
+                    - kurze Problem-Skizzen  
+                    - logische Übergänge  
+                    - Kontextbezüge  
+                - Variieren Sie Einleitungen bewusst in Rhythmus, Struktur und Perspektive.
+                - Ziel hierbei ist ein lebendiger, dynamischer und abwechslungsreicher Textfluss – kein repetitiver Rhythmus trotz fester Struktur.
+                - Vermeiden Sie inhaltliche Wiederholungen: Jeder Abschnitt soll einen eigenen, klar abgegrenzten Aspekt behandeln.
+                - Nutzenargumente, Vorteile oder Prozessschritte dürfen nicht doppelt aufgeführt werden – weder sprachlich identisch noch inhaltlich redundant.
+                - Achten Sie auf inhaltliche Fortschritte zwischen den Kapiteln – keine Rückgriffe auf bereits behandelte Punkte, außer zur gezielten Verknüpfung.
+
+
+                ## F. Stilgrenzen
+
+                - Keine CTAs wie „Jetzt anrufen“ oder „Jetzt buchen“
+                - Kein aufgesetzter Humor
+                - Keine Stereotype („der überforderte Kunde“)
+                - Keine überzogenen Versprechen oder Heilsbotschaften
+                - Keine erfundenen Geschichten (→ siehe Abschnitt HUMANIZER)
+
+                ---
+
+                # ======================================
+                # 7. HUMANIZER (P3 – optional)
+                # ======================================
+
+                ## Ziel
+
+                - Sachlich, praxisnah, erfahrungsbasiert – ohne Dramatisierung
+
+                ## Darstellungsform
+
+                - Verallgemeinerte Abläufe / Szenen erlaubt  
+                → Keine konkreten Namen, Orte, Einzelfälle
+
+                - Keine erfundenen Erfahrungsberichte
+                - Keine persönlichen Anekdoten
+                - Keine fiktiven Elemente oder Storytelling
+
+                ## Wirkung
+
+                - Der Text soll realistisch, glaubwürdig und nutzerorientiert wirken  
+                - Ziel: fachlich fundierter, alltagsnaher Text mit hoher Praxisrelevanz
+
+                ---
+
+                # ======================================
+                # 8. ANTI-BIAS & FAKTENCHECK
+                # ======================================
+
+                - Keine Stereotype; sensible Themen sachlich-empathisch behandeln
+                - Fachliche Aussagen:
+                → Wenn möglich: ≥ 2 Quellen
+                → Alternativ: Abschwächung mit „oft“, „in vielen Fällen“, „meistens“
+
+                ---
+
+                # ======================================
+                # 9. AUSGABEFORMAT (P1)
+                # ======================================
+
+                • Zulässige Tags: `<h1>`, `<h2>`, `<p>`, `<ul>`, `<li>`, `<br>`, `<!--sec:slug-->`  
+                • Slug-Format: `^[a-z0-9-]+$`
+                • Jeder <h2>-Abschnitt beginnt mit einem inhaltlich klaren, eigenständigen Eröffnungssatz – kein Rückgriff auf bereits verwendete Formulierungen oder Aussagen bzw. Wiederholung aus anderen Kapiteln.
+
+
+                ### Struktur:
+
+                1. 1. `<h1>` mit {page_title} + aussagekräftigem Slug sollte innerhalb des ersten Slugs stehen, wenn es sich um ein Banner handelt.  
+                2. Optional: `<!--sec:banner-->`  
+                3. beim Geben von {SEC_MARKER_FMT} ist der Slug der Abschnittsname, der in den Abschnittszeilen oder den Regeln erwähnt wird (Slug-Namen werden normalerweise wie Banner, (linkes_Bild_rechter_Inhalt,      linker_Inhalt_rechtes_Bild, linkes_Bild_rechter_Inhalt2, linker_Inhalt_rechtes_Bild, FAQ, weiterlesen usw.)            
+                4. Für jede Zeile in SECTION_LINES:  
+                `<!--sec:slug(section_name)--><h2>…</h2>` mit 150–200 Wörtern Text  
+                5. Optional: `<!--sec:sources--><h2>Quellen</h2><ul><li>…</li></ul>`
+
+                **Absatzregel:**  
+            
+                1. VSchreiben Sie vor jedem Abschnitt genau einen HTML-Kommentar {SEC_MARKER_FMT.format(slug='section_name_or_the_slug(eg:banner,left_image_right_content,left_content_right_image)')} mit dem entsprechenden Slug aus der unten stehenden Liste. Fügen Sie direkt danach eine sichtbare <h2>-Überschrift ein (mit Ausnahme der H1 am Anfang).
+
+                # 10. QUALITÄTSKRITERIEN (P1–P3)
+
+                • Jeder Abschnitt behandelt ein eigenständiges Thema ohne inhaltliche Dopplungen  
+                • Satzanfänge, Satzlängen und Perspektiven variieren  
+                • Keine übermäßigen Wiederholungen von „unser/unserer“  
+                • Einstiegssätze sind abwechslungsreich und thematisch klar  
+                • Sprache ist sachlich, klar, glaubwürdig – ohne PR-Floskeln  
+                • Nutzen ist konkret und nachvollziehbar formuliert  
+                • Textfluss ist logisch – keine isolierten oder losgelösten Absätze 
+                • Keine allgemeinen Floskeln oder Pauschalaussagen – alle Aussagen sind plausibel, nachvollziehbar und realitätsnah
+                • Sprachfluss wirkt natürlich und nicht „zu perfekt“ – stilistische Mikroabweichungen sind erlaubt  
+                • Der Text vermeidet Roboterlogik oder monotone Syntax – Fokus liegt auf Leserfreundlichkeit und sprachlicher Authentizität   
+                
+                # 11.
+                    Verfassen Sie den gesamten Inhalt in deutscher Sprache.
+                    
+            """
+    elif language == 'englisch':
+        for slug, word_count, rule in sections_rules:
+            rule_text = rule if rule else "No special requirements"
+            section_lines.append(f"- {slug} ({word_count} Words): {rule_text}")
+        prompt = f"""
     
             # ======================================
-            # 0. VARIABLEN & KAPITELVORGABEN
+            # 0. VARIABLES & SECTION GUIDELINES
             # ======================================
 
-            MAIN_KEYWORD  = {page_title}
-            KEYWORDS      = {keywords}           
+            MAIN_KEYWORD  = {page_title} 
+            KEYWORDS      = {keywords}
             SECTION_LINES :
-            
-            {section_lines}     
 
-            • Gib für jede SECTION_LINE eine prägnante H2-Überschrift aus – leserorientiert, konkret, mit passenden Keywords.
-            • Keine generischen Titel wie „Kontext“, „Relevanz“, „Ablauf“ oder SEO-Phrasen aus Substantiven.
-            • Die Überschrift soll Interesse wecken, aber nicht den Zweck beschreiben.
+            {section_lines}  
 
-            ---
-
-            # ======================================
-            # 1. ZIEL
-            # ======================================
-
-            • Verfasse einen hochwertigen HTML-Servicetext aus Unternehmenssicht zum Thema "{page_title}".
-            • Der Text dient als professionelle, unternehmensnahe Darstellung unserer Dienstleistungen.
-            • Ziel ist es, den konkreten Mehrwert unseres Angebots verständlich, glaubwürdig und kundenorientiert darzustellen – ohne PR-Sprache, aber mit klarer Positionierung.
-            • HTML-Ausgabe gemäß Abschnitt 9.
+            • Write a clear, reader-focused H2 heading for each SECTION_LINE – specific, benefit-oriented, keyword-integrated.  
+            • No generic titles like "Context" or "Relevance" or keyword-dump phrases.  
+            • Headlines should spark interest without explaining purpose.
 
             ---
 
             # ======================================
-            # 2. PRIORITÄT (P1–P3)
+            # 1. OBJECTIVE
             # ======================================
 
-            P1 – HTML-Struktur & Keywordplatzierung  
-            P2 – Logischer Aufbau & Absatzverknüpfung  
-            P3 – Sprachstil & Leserführung  
+            • Create a high-quality **HTML service description** from a business perspective about **{page_title}**.  
+            • The text serves as a **professional representation of the service offering**.  
+            • The goal is to convey the **concrete value** of the service clearly and credibly – without promotional tone but with confident positioning.  
+            • Output the text in clean HTML format (see Section 9).
+
+            ---
+
+            # ======================================
+            # 2. PRIORITY (P1–P3)
+            # ======================================
+
+            P1 – HTML structure & keyword placement  
+            P2 – Logical structure & paragraph transitions  
+            P3 – Tone & reader guidance
 
             ---
 
@@ -117,209 +355,180 @@ def build_longform_prompt(page_title: str, keywords: str, sections_rules: List[T
             # ======================================
 
             PHASE 1 – COMPOSE:  
-            Verwende folgende Platzhalterstruktur:  
-              [H1], [H2], [P], [UL], [LI]  
+            Use the following placeholder structure:  
+            [H1], [H2], [P], [UL], [LI]
 
             PHASE 2 – MARKUP (temp ≤ 0.2):  
-            Ersetze Platzhalter durch finalen HTML-Code. **Nur HTML ausgeben.**
+            Replace placeholders with final HTML. **Output only HTML.**
 
             ---
 
             # ======================================
-            # 4. CHAIN-OF-THOUGHT (intern)
-            # ======================================
+            # 4. CHAIN OF THOUGHT (internal)
 
-            1) Themenverständnis  
-            2) Strukturierung der Abschnitte  
-            3) Textproduktion (compose)  
-            4) Qualitätsscan  
-            5) HTML-Umsetzung (markup)
-            
-            ---
-
-            # ======================================
-            # 5. KEYWORD-REGELN (P1)
-            # ======================================
-
-            • {page_title}: in <h1>, ≥ 3× im Text (≤100 Wörter Abstand)  
-            • KEYWORDS: mind. 1× pro Abschnitt (in <h2> oder <h3>), organisch eingebaut  
-            • Keine Abwandlungen: exakt, orthografisch korrekt, natürlich integriert  
+            1) Understand the topic  
+            2) Structure content  
+            3) Write each section  
+            4) Quality scan  
+            5) Apply HTML markup
 
             ---
 
             # ======================================
-            # 6. STIL-REGELN (P2)
+            # 5. KEYWORD RULES (P1)
+
+            • {page_title}: in <h1>, ≥ 3× throughout the text (≤100 words apart)  
+            • All other KEYWORDS: at least 1× per section (in <h2> or <h3>), placed naturally  
+            • No variations: use keywords exactly as provided, with correct spelling and organic integration
+
+            ---
+
             # ======================================
+            # 6. STYLE RULES (P2)
 
-            ## A. Haltung & Ton
+            ## A. Tone & Voice
 
-            - Sie-Form – ruhig, professionell, sachlich-empathisch
-            - Keine künstliche Lockerheit
-            - Leseransprache auf Augenhöhe
-            - – Ziel: Orientierung durch nachvollziehbaren, glaubwürdigen Mehrwert – ohne Übertreibung
-            - Kurze, realistische, allgemein erkennbare Alltagsszenen erlaubt  
-              → Keine Einzelfälle, aber illustrative Mini-Situationen zur Verdeutlichung  
-              → Ergänze nachvollziehbares Insiderwissen
-            - Verwenden Sie lebensnahe, bildhafte, aber sachlich bleibende Formulierungen – mit feiner Emotionalität, ohne Übertreibung oder anbiedernden Ton.
+            - Use **professional, calm, respectful "you"-address**  
+            - No artificial cheerfulness  
+            - Speak to the reader as a peer  
+            - Goal: Clarity, credibility, and relevance – no exaggeration  
+            - Everyday situations are allowed but generalized – no storytelling  
+            - Use precise, real-world phrasing – neutral but slightly emotionally aware  
+            - Avoid hype, wordplay, or metaphors  
+            - Use brief, illustrative examples (not case studies)
 
+            ## B. Positioning
 
-            ## B. Positionierung 
-            • Der Text soll nicht nur informieren, sondern die Leistungen und Stärken des Unternehmens klar erkennbar machen.
-            • Positionieren Sie das Unternehmen als kompetenten, verlässlichen Anbieter – faktenbasiert, glaubwürdig und kundennah.
-            • Vermeiden Sie übermäßige Selbstbezüge wie „unser Team“, „unsere Erfahrung“, „unsere Kund:innen“ – verwenden Sie neutrale Formulierungen oder bauen Sie die Leistung in den Lösungskontext ein (z.B. „Der gesamte Ablauf wird koordiniert“ statt „Unser Team koordiniert …“).
-                - Maximal 1× „unser/unserer“ pro Absatz.
-            • Zeigen Sie konkret, **welche Probleme gelöst werden**, **wie der Service funktioniert** und **welchen Nutzen Kund:innen daraus ziehen**.
-            • Verwenden Sie sachlich überzeugende Formulierungen
-            • Bleiben Sie dabei präzise und zurückhaltend – keine PR-Sprache, keine Superlative, keine Heilsversprechen.
+            • Focus on what problems are solved, how the service works, and what benefits customers gain  
+            • Position the company as **reliable and competent**, not self-centered  
+            • Use "our" or "we" only **once per paragraph**, if at all  
+            • Reframe team-centric actions into solution-centric outcomes (e.g., “The process is coordinated” rather than “Our team coordinates it”)  
+            • Avoid sales phrases or promotional claims
 
-            ## C. Ausdruck
+            ## C. Wording
 
-            - Klar, strukturiert, präzise – ohne Schnörkel
-            - Keine Floskeln, Buzzwords, Superlative oder PR-Sprache
-            - Keine Phrasen wie „Keine Sorge“, „Hand aufs Herz“
-            - Keine Wortspiele oder Metaphern
-            - Nutzen konkret benennen – keine Konjunktive
-            - Vermeiden Sie ausgeleierte Werbeformulierungen wie „Erleben Sie“, „Vertrauen Sie“, „Mit uns wird ...“, „steht Ihnen mit Rat und Tat zur Seite“.
-            - Wenig bis keine Dopplungen in Formulierungen wie „stressfrei und sorgenfrei“, „schnell und unkompliziert“.
-            - Bevorzugen Sie klare, belegbare Aussagen statt Versprechens-Rhetorik.
+            - Clear, specific, and structured  
+            - Avoid fluff, jargon, and generic phrases  
+            - No buzzwords like “effortless,” “worry-free,” “fast and easy”  
+            - Avoid empty CTA language like “Call us now” or “Experience our service”  
+            - State benefits factually, not hypothetically  
+            - Avoid repeated dualities (“smooth and seamless,” “easy and efficient”)  
+            - Focus on demonstrable, grounded value
 
+            ## D. Sentence Structure
 
-            ## D. Satzbau & Rhythmus
+            - Avg. sentence length: 12–25 words  
+            - Target: 40% short (≤12), 40% medium (13–20), 20% long (>20)  
+            - Max: 1 main + 1 subordinate clause per sentence  
+            - After two long sentences, insert one short (<10 words)  
+            - Vary sentence starters to avoid monotony  
+            - Use occasional rhythm breaks for liveliness (e.g., inversion, one-word sentences)
 
-            - Ø-Satzlänge 12–25 Wörter (StdAbw ≥ 6 W.)
-            - 40 % kurz (≤12 W.), 40 % mittel (13–20 W.), 20 % lang (>20 W.)
-            - Max. 1 Hauptsatz + 1 Nebensatz pro Satz
-            - Nach zwei langen Sätzen: 1 kurzer Satz (<10 W.)
-            - Satzanfänge variieren, kein gleichförmiger Rhythmus
-            - Erlaubt sind gelegentliche stilistische Abweichungen wie Inversionen, Parenthesen oder Ein-Wort-Sätze, um einen lebendigeren Sprachfluss zu erzeugen.
-            - Erzielen Sie einen lebendigen Rhythmus durch den Wechsel von kurzen Statements und längeren Gedankenbögen („Burstiness“).
+            ## E. Section Structure
 
+            - Each section builds on the previous one  
+            - Avoid repeating content or phrases  
+            - Each section should bring **new information or perspective**  
+            - Transitions should feel **natural and logical**  
+            - Use varied entry styles: facts, transitions, observations  
+            - Use rhetorical questions sparingly (2–3 max across full text), only to spark thought  
+            - Do not reintroduce previously covered points unless to build on them  
 
+            ## F. Style Boundaries
 
-            ## E. Struktur
-
-            - Logisch aufeinander aufbauende Kapitel
-            - Keine separaten Einleitungen je Abschnitt
-            - Rhetorische Fragen: max. 2–3 pro Text, gezielt platziert, um Denkimpulse oder sanfte Übergänge zu schaffen – nicht zur Dramatisierung.
-            - Kein Pathos, kein Storytelling um des Effekts willen
-            - Der erste Satz jedes Abschnitts muss sich sprachlich klar vom vorherigen unterscheiden.
-            - Vermeiden Sie gleichförmige Satzanfänge wie „Ein …“, „Der …“, „Ein weiterer …“, „Dabei …“ etc.
-                • Erlaubt sind z.B.:
-                  – Beobachtungen
-                  – logische Übergänge 
-                  – kurze Feststellungen 
-                  – situative Sätze 
-                • Verwenden Sie unterschiedliche Einstiegstypen:
-                  - sachliche Feststellungen  
-                  - kurze Problem-Skizzen  
-                  - logische Übergänge  
-                  - Kontextbezüge  
-            - Variieren Sie Einleitungen bewusst in Rhythmus, Struktur und Perspektive.
-            - Ziel hierbei ist ein lebendiger, dynamischer und abwechslungsreicher Textfluss – kein repetitiver Rhythmus trotz fester Struktur.
-            - Vermeiden Sie inhaltliche Wiederholungen: Jeder Abschnitt soll einen eigenen, klar abgegrenzten Aspekt behandeln.
-            - Nutzenargumente, Vorteile oder Prozessschritte dürfen nicht doppelt aufgeführt werden – weder sprachlich identisch noch inhaltlich redundant.
-            - Achten Sie auf inhaltliche Fortschritte zwischen den Kapiteln – keine Rückgriffe auf bereits behandelte Punkte, außer zur gezielten Verknüpfung.
-
-
-            ## F. Stilgrenzen
-
-            - Keine CTAs wie „Jetzt anrufen“ oder „Jetzt buchen“
-            - Kein aufgesetzter Humor
-            - Keine Stereotype („der überforderte Kunde“)
-            - Keine überzogenen Versprechen oder Heilsbotschaften
-            - Keine erfundenen Geschichten (→ siehe Abschnitt HUMANIZER)
+            - No CTAs  
+            - No artificial humor  
+            - No stereotypes (e.g., “the overwhelmed customer”)  
+            - No idealized promises or exaggerated language  
+            - No personal stories or fictive anecdotes
 
             ---
 
             # ======================================
             # 7. HUMANIZER (P3 – optional)
-            # ======================================
 
-            ## Ziel
+            ## Objective
 
-            - Sachlich, praxisnah, erfahrungsbasiert – ohne Dramatisierung
+            - Stay factual, practical, relatable – avoid dramatization
 
-            ## Darstellungsform
+            ## Allowed
 
-            - Verallgemeinerte Abläufe / Szenen erlaubt  
-              → Keine konkreten Namen, Orte, Einzelfälle
-
-            - Keine erfundenen Erfahrungsberichte
-            - Keine persönlichen Anekdoten
-            - Keine fiktiven Elemente oder Storytelling
-
-            ## Wirkung
-
-            - Der Text soll realistisch, glaubwürdig und nutzerorientiert wirken  
-            - Ziel: fachlich fundierter, alltagsnaher Text mit hoher Praxisrelevanz
+            - Generalized scenarios or routines  
+            - No names, places, or fictionalized reviews  
+            - Text should **feel realistic and grounded**
 
             ---
 
             # ======================================
-            # 8. ANTI-BIAS & FAKTENCHECK
-            # ======================================
+            # 8. ANTI-BIAS & FACT CHECK
 
-            - Keine Stereotype; sensible Themen sachlich-empathisch behandeln
-            - Fachliche Aussagen:
-              → Wenn möglich: ≥ 2 Quellen
-              → Alternativ: Abschwächung mit „oft“, „in vielen Fällen“, „meistens“
+            - Avoid stereotypes; use sensitive, neutral tone  
+            - When making technical statements:  
+            – Preferably base them on ≥ 2 sources  
+            – If not: soften with phrases like “in many cases,” “typically,” “most often”
 
             ---
 
             # ======================================
-            # 9. AUSGABEFORMAT (P1)
+            # 9. OUTPUT FORMAT (P1)
             # ======================================
 
-            • Zulässige Tags: `<h1>`, `<h2>`, `<p>`, `<ul>`, `<li>`, `<br>`, `<!--sec:slug-->`  
-            • Slug-Format: `^[a-z0-9-]+$`
-            • Jeder <h2>-Abschnitt beginnt mit einem inhaltlich klaren, eigenständigen Eröffnungssatz – kein Rückgriff auf bereits verwendete Formulierungen oder Aussagen bzw. Wiederholung aus anderen Kapiteln.
+            • Allowed tags: `<h1>`, `<h2>`, `<p>`, `<ul>`, `<li>`, `<br>`, `<!--sec:slug-->`
+            • Slug format: `^[a-z0-9-]+$`
+            • Each <h2> section begins with a clear, independent opening sentence – no recourse to previously used formulations or statements, or repetition from other chapters.
 
+            ### Structure:
 
-            ### Struktur:
+            1. 1. `<h1>` with {page_title} + meaningful slug should be within the first slug if it is a banner.
+            2. Optional: `<!--sec:banner-->`
+            3. When specifying {SEC_MARKER_FMT}, the slug is the section name mentioned in the section lines or the rules (slug names are usually used like banner, (left_image_right_content, left_content_right_image, left_image_right_content2, left_content_right_image, FAQ, read more, etc.)
+            4. For each line in SECTION_LINES:
+            `<!--sec:slug(section_name)--><h2>…</h2>` with 150–200 words of text
+            5. Optional: `<!--sec:sources--><h2>Sources</h2><ul><li>…</li></ul>`
 
-            1. 1. `<h1>` mit {page_title} + aussagekräftigem Slug sollte innerhalb des ersten Slugs stehen, wenn es sich um ein Banner handelt.  
-            2. Optional: `<!--sec:banner-->`  
-            3. beim Geben von {SEC_MARKER_FMT} ist der Slug der Abschnittsname, der in den Abschnittszeilen oder den Regeln erwähnt wird (Slug-Namen werden normalerweise wie Banner, (linkes_Bild_rechter_Inhalt,      linker_Inhalt_rechtes_Bild, linkes_Bild_rechter_Inhalt2, linker_Inhalt_rechtes_Bild, FAQ, weiterlesen usw.)            
-            4. Für jede Zeile in SECTION_LINES:  
-               `<!--sec:slug(section_name)--><h2>…</h2>` mit 150–200 Wörtern Text  
-            5. Optional: `<!--sec:sources--><h2>Quellen</h2><ul><li>…</li></ul>`
+            **Paragraph rule:**
 
-            **Absatzregel:**  
-           
-            1. VSchreiben Sie vor jedem Abschnitt genau einen HTML-Kommentar {SEC_MARKER_FMT.format(slug='section_name_or_the_slug(eg:banner,left_image_right_content,left_content_right_image)')} mit dem entsprechenden Slug aus der unten stehenden Liste. Fügen Sie direkt danach eine sichtbare <h2>-Überschrift ein (mit Ausnahme der H1 am Anfang).
+            1. Write exactly one slug before each section HTML comment {SEC_MARKER_FMT.format(slug='section_name_or_the_slug(eg:banner,left_image_right_content,left_content_right_image)')} with the appropriate slug from the list below. Insert a visible <h2> heading immediately after it (except for the H1 at the beginning).
 
-            # 10. QUALITÄTSKRITERIEN (P1–P3)
+            # 10. QUALITY STANDARDS (P1–P3)
 
-            • Jeder Abschnitt behandelt ein eigenständiges Thema ohne inhaltliche Dopplungen  
-            • Satzanfänge, Satzlängen und Perspektiven variieren  
-            • Keine übermäßigen Wiederholungen von „unser/unserer“  
-            • Einstiegssätze sind abwechslungsreich und thematisch klar  
-            • Sprache ist sachlich, klar, glaubwürdig – ohne PR-Floskeln  
-            • Nutzen ist konkret und nachvollziehbar formuliert  
-            • Textfluss ist logisch – keine isolierten oder losgelösten Absätze 
-            • Keine allgemeinen Floskeln oder Pauschalaussagen – alle Aussagen sind plausibel, nachvollziehbar und realitätsnah
-            • Sprachfluss wirkt natürlich und nicht „zu perfekt“ – stilistische Mikroabweichungen sind erlaubt  
-            • Der Text vermeidet Roboterlogik oder monotone Syntax – Fokus liegt auf Leserfreundlichkeit und sprachlicher Authentizität   
-              
-            # 11.
-             Write the complete content in {language} language.
-             
-            
-
+            • Each section addresses a **unique, clearly defined** topic  
+            • No repetition in arguments, examples, or structure  
+            • Sentence openings, lengths, and perspectives vary  
+            • Paragraph transitions are smooth  
+            • Style is factual, helpful, and grounded – no marketing speak  
+            • Benefits are specific and credible  
+            • No robotic syntax or pattern loops  
+            • Maintain a **natural flow** with realistic tone variations
+            ---
+            # 11. LANGUAGE
+            **Write the entire content in English language.**
         """
+    else:
+        pass    
     return prompt.strip()
+
 
 
 
 def generate_full_page_text(page_title: str, keywords: str, sections_rules: List[Tuple[str, str, str]], language:str) -> str:
     prompt = build_longform_prompt(page_title, keywords, sections_rules, language)
+    messages=""
+    if language == 'deutsch':
+        messages = [
+            {"role": "system", "content": "Du bist ein professioneller deutschsprachiger Contentwriter mit Spezialisierung auf hochwertige und natürliche Servicetexte für Unternehmen. Deine Texte sind inhaltlich fundiert, klar strukturiert und stilistisch glaubwürdig. Du schreibst mit Fokus auf Relevanz, Verständlichkeit und sprachlicher Authentizität – ohne Floskeln, PR-Sprache oder künstliche Werbesignale. Dein Stil ist sachlich-empathisch, ruhig und informierend. Du sprichst Leser:innen auf Augenhöhe an, vermeidest dramatisierende Sprache und hältst dich an realistische Formulierungen mit erkennbarem Alltagsbezug. Du arbeitest mit natürlichem, variierendem Satzrhythmus und baust Absätze logisch und flüssig aufeinander auf. Jeder Text soll konsistent, klar gegliedert und in sich schlüssig sein – ohne isolierte Absätze oder wiederholte Einleitungen. Dein Ziel ist ein nutzerzentrierter, glaubwürdiger Text mit echtem Mehrwert – informierend, praxisnah und professionell zurückhaltend. Du beginnst jeden Abschnitt eigenständig, abwechslungsreich und thematisch klar und vermeidest dabei gleichförmige Einstiege."},
+            {"role": "user", "content": prompt},
+        ]
+    elif language == 'englisch':
+        messages = [
+            {"role": "system", "content": "You are a professional english-speaking content writer specializing in high-quality, natural service texts for companies. Your texts are well-founded in content, clearly structured, and stylistically credible. You write with a focus on relevance, comprehensibility, and linguistic authenticity – without clichés, PR jargon, or artificial advertising signals. Your style is factual and empathetic, calm, and informative. You address readers at eye level, avoid overly dramatic language, and stick to realistic formulations with recognizable everyday relevance. You work with a natural, varied sentence rhythm and build paragraphs logically and fluently. Each text should be consistent, clearly structured, and coherent – without isolated paragraphs or repeated introductions. Your goal is a user-centered, credible text with real added value – informative, practical, and professionally restrained. You begin each section independently, varied, and thematically clear, avoiding monotonous introductions."},
+            {"role": "user", "content": prompt},
+        ]
+    else:
+        pass    
     # print('****************************************************************************************')
     # print(prompt)
     # print('****************************************************************************************')
-    messages = [
-        {"role": "system", "content": f"Du bist ein professioneller {language}sprachiger Contentwriter mit Spezialisierung auf hochwertige und natürliche Servicetexte für Unternehmen. Deine Texte sind inhaltlich fundiert, klar strukturiert und stilistisch glaubwürdig. Du schreibst mit Fokus auf Relevanz, Verständlichkeit und sprachlicher Authentizität – ohne Floskeln, PR-Sprache oder künstliche Werbesignale. Dein Stil ist sachlich-empathisch, ruhig und informierend. Du sprichst Leser:innen auf Augenhöhe an, vermeidest dramatisierende Sprache und hältst dich an realistische Formulierungen mit erkennbarem Alltagsbezug. Du arbeitest mit natürlichem, variierendem Satzrhythmus und baust Absätze logisch und flüssig aufeinander auf. Jeder Text soll konsistent, klar gegliedert und in sich schlüssig sein – ohne isolierte Absätze oder wiederholte Einleitungen. Dein Ziel ist ein nutzerzentrierter, glaubwürdiger Text mit echtem Mehrwert – informierend, praxisnah und professionell zurückhaltend. Du beginnst jeden Abschnitt eigenständig, abwechslungsreich und thematisch klar und vermeidest dabei gleichförmige Einstiege."},
-        {"role": "user", "content": prompt},
-    ]
     return chat_complete(messages, model="gpt-4o", temperature=0.8, top_p=1.0,
                          frequency_penalty=0.15, presence_penalty=0.25)
 
